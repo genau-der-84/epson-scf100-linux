@@ -12,7 +12,7 @@ genau wie mit dem Windows-Treiber.
 
 ## Wozu
 
-Epson bietet für den SC-F100 im Sublimationsbetrieb keinen Linux-Treiber. Der allgemeine Treiber `escpr2`
+Der SC-F100 ist ein reiner Sublimationsdrucker, und Epson bietet für ihn keinen Linux-Treiber. Der allgemeine Treiber `escpr2`
 spricht zwar mit dem Drucker, nimmt aber die falschen Medieneinstellungen und die druckereigene
 Farbtabelle. Sublimationsdrucke haben damit falsche Farben. Dieser Treiber sendet dieselben Aufträge wie
 der Windows-Treiber, rechnet die Farben mit Epsons offiziellen Sublimationsprofilen um und spiegelt das Bild.

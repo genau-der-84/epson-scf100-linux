@@ -12,7 +12,7 @@ exactly like the Windows driver.
 
 ## Why
 
-Epson offers no Linux driver for the SC-F100 in sublimation mode. The generic `escpr2` driver can talk
+The SC-F100 is a dedicated dye sublimation printer, and Epson offers no Linux driver for it. The generic `escpr2` driver can talk
 to the printer, but it uses the wrong media settings and applies the printer's own colour table, so
 sublimation prints come out with wrong colours. This driver sends the same print jobs as the Windows
 driver, converts colours with Epson's official sublimation ICC profiles, and mirrors the image.

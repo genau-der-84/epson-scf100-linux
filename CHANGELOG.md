@@ -8,7 +8,7 @@ All notable changes to this project are documented here. The format follows
 First public release.
 
 ### Added
-- CUPS driver for the Epson SureColor SC-F100 in dye sublimation mode: filter `rastertoscf100` and PPD.
+- CUPS driver for the Epson SureColor SC-F100 dye sublimation printer: filter `rastertoscf100` and PPD.
   Print jobs match the Windows driver command by command (media, quality, print direction, paper size,
   colour table in the printer off).
 - Colour management with Epson's official ICC profiles (Rigid, Textile), perceptual or relative colorimetric.
