@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Fixed
+- Network printer search without avahi-daemon (e.g. Manjaro, where it is disabled by default): the SNMP fallback
+  looked for the model name in the short `lpinfo -v` listing, which only has class and URI, and never found the printer.
 - The installer no longer confirms package manager transactions by itself unless it was started with `-y`.
   A transaction can do more than install the requested package (on Fedora, dnf removed old kernels because of
   `installonly_limit` while installing bsdtar); the user now sees the package manager's summary and decides.

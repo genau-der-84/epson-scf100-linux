@@ -200,8 +200,11 @@ search_printers() {
       | sort -u) || true
   fi
   if [ -z "$found" ] && command -v lpinfo >/dev/null; then
-    found=$(timeout 30 lpinfo --include-schemes snmp -v 2>/dev/null \
-      | awk '/SC-F100/ && match($2, /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/) { print substr($2, RSTART, RLENGTH) "\tEPSON SC-F100 (SNMP)" }' \
+    # The model name is only in the long listing (-l); the short one prints just class and URI
+    found=$(timeout 30 lpinfo -l --include-schemes snmp -v 2>/dev/null \
+      | awk '/^Device: uri = / { uri = $4 }
+             /^[ \t]+make-and-model = .*SC-F100/ && match(uri, /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/) {
+               print substr(uri, RSTART, RLENGTH) "\tEPSON SC-F100 (SNMP)" }' \
       | sort -u) || true
   fi
   printf '%s' "$found"
