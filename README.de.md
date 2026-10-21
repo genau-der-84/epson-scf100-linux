@@ -60,7 +60,8 @@ Ohne Optionen fragt der Installer in Auswahlfenstern:
 
 Ohne `whiptail`/`dialog` stellt er dieselben Fragen als Text.
 
-Ohne Rückfragen:
+<details>
+<summary>Optionen für die Installation ohne Rückfragen (Skripte, Fortgeschrittene)</summary>
 
 | Option | Bedeutung |
 |---|---|
@@ -81,6 +82,8 @@ Ohne Rückfragen:
 Beispiele: `sudo ./install.sh -n auto -y` · `sudo ./install.sh -n 192.168.1.50 -m textil` ·
 `sudo ./install.sh -u`. Die Kurzoptionen gelten in beiden Sprachen, die langen Namen gibt es auch auf
 Englisch (`--network`, `--media`, `--color` …).
+
+</details>
 
 Warteschlangen: `SC-F100-USB`, `SC-F100-Netz` (englische Locale: `SC-F100-Network`), auf Wunsch
 `…-Programmfarbe` (`…-AppColor`).

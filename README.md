@@ -56,7 +56,8 @@ both), which of the printers found on the network to use, the default media and 
 you want an additional queue for applications under Wine. Without `whiptail`/`dialog` it asks the
 same questions as plain text.
 
-Non-interactive:
+<details>
+<summary>Options for installing without questions (scripts, advanced users)</summary>
 
 | Option | Meaning |
 |---|---|
@@ -76,6 +77,8 @@ Non-interactive:
 
 Examples: `sudo ./install.sh -n auto -y` · `sudo ./install.sh -n 192.168.1.50 -m textile` ·
 `sudo ./install.sh -u`. German option names work as well (`--netz`, `--medium`, `--farbe` …).
+
+</details>
 
 Print queues: `SC-F100-USB`, `SC-F100-Network` (German locale: `SC-F100-Netz`), optionally
 `…-AppColor` (`…-Programmfarbe`).
