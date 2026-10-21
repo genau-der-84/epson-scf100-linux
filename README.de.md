@@ -94,6 +94,11 @@ der Adresse.
 3. In der Größe des Motivs drucken, z. B. in GIMP mit Bildauflösung 300 ppi und „Seitenränder ignorieren“.
    Spiegeln ist voreingestellt, wie für den Sublimationstransfer nötig.
 
+Auf der Kommandozeile: `lp -d SC-F100-Netz motiv.pdf`. Für ein Bild in Tassengröße (240 × 100 mm, z. B.
+2835 × 1181 Pixel bei 300 ppi) zusätzlich `-o print-scaling=none`:
+`lp -d SC-F100-Netz -o print-scaling=none motiv.png`. Ohne diese Option skaliert CUPS Bilder, und zwar je nach
+Distribution unterschiedlich (geprüft unter Debian 12, Ubuntu 22.04/24.04 und Fedora 44).
+
 ## Farbverwaltung: Wer rechnet ins Epson-Profil um?
 
 Genau einer darf umrechnen, sonst stimmen die Farben nicht. Die Option heißt **Farbverwaltung**:

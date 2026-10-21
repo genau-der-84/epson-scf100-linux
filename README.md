@@ -90,6 +90,11 @@ to the address.
 3. Print at the size of your design (e.g. in GIMP: image resolution 300 ppi, "ignore page margins").
    Mirroring is on by default, as needed for sublimation transfer.
 
+From the command line: `lp -d SC-F100-Network design.pdf`. For an image designed at mug size
+(240 × 100 mm, e.g. 2835 × 1181 px at 300 ppi) add `-o print-scaling=none`:
+`lp -d SC-F100-Network -o print-scaling=none design.png`. Without it CUPS scales images, and the result
+differs between distributions (checked on Debian 12, Ubuntu 22.04/24.04, Fedora 44).
+
 ## Colour management: who converts to the Epson profile?
 
 Exactly one party may convert, otherwise the colours are wrong. The option is called **Color Management**:

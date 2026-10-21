@@ -59,6 +59,15 @@
 *ScfQuality Standard/Standard: ""
 *CloseUI: *ScfQuality
 
+*% IPP print-quality -> ScfQuality. Without these presets, some CUPS builds (e.g. Ubuntu) guess a mapping from the
+*% option name and turn the default print-quality=normal into "Standard", overriding *DefaultScfQuality: High.
+*APPrinterPreset Color_Draft/Draft: "*ColorModel RGB *ScfQuality Standard com.apple.print.preset.graphicsType General com.apple.print.preset.quality low com.apple.print.preset.output-mode color"
+*End
+*APPrinterPreset Color_Normal/Normal: "*ColorModel RGB *ScfQuality High com.apple.print.preset.graphicsType General com.apple.print.preset.quality mid com.apple.print.preset.output-mode color"
+*End
+*APPrinterPreset Color_High/High: "*ColorModel RGB *ScfQuality High com.apple.print.preset.graphicsType General com.apple.print.preset.quality high com.apple.print.preset.output-mode color"
+*End
+
 *OpenUI *ScfMirror/Mirror Image: Boolean
 *OrderDependency: 20 AnySetup *ScfMirror
 *DefaultScfMirror: True

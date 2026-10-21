@@ -221,12 +221,12 @@ existing_name() {  # preferred name, other-language name -> the one that exists,
 own_queues() {  # all queues of this driver, one name per line
   local q
   for q in $(lpstat -v 2>/dev/null | awk '{print $3}' | tr -d ':'); do
-    lpoptions -p "$q" 2>/dev/null | grep -q 'scf100' && echo "$q"
+    timeout 10 lpoptions -p "$q" 2>/dev/null | grep -q 'scf100' && echo "$q"   # timeout: foreign network printers can hang
   done
   return 0
 }
 color_of() {  # queue -> Driver | Application
-  lpoptions -p "$1" -l 2>/dev/null | awk -F': ' '$1 ~ /^ScfColor\// { n = split($2, w, " ");
+  timeout 10 lpoptions -p "$1" -l 2>/dev/null | awk -F': ' '$1 ~ /^ScfColor\// { n = split($2, w, " ");
     for (i = 1; i <= n; i++) if (w[i] ~ /^\*/) print substr(w[i], 2) }'
 }
 color_name() {
@@ -548,6 +548,33 @@ else
   choose_wrapper || die "$(t "escpr2 installiert, aber kein epson-escpr-wrapper2 ab $ESCPR2_MIN gefunden" \
                               "escpr2 installed, but no epson-escpr-wrapper2 $ESCPR2_MIN or newer found"): $TOO_OLD"
   info "$(t "Epson escpr2 installiert" "Epson escpr2 installed"): $WRAPPER_VER, $WRAPPER"
+fi
+
+# Epson's .deb does not declare its dependency on libcupsimage (missing on Debian/Ubuntu without
+# printer-driver packages; the filter then fails with "libcupsimage.so.2: cannot open shared object file").
+missing_libs() { ldd "$1" 2>/dev/null | awk '/not found/ {print $1}'; }
+LIBS=$(missing_libs "$WRAPPER")
+if [ -n "$LIBS" ]; then
+  case $FAMILY in
+    debian) for p in libcupsimage2t64 libcupsimage2; do
+              apt-cache show "$p" >/dev/null 2>&1 && { LIBPKG=$p; break; }
+            done ;;
+    suse)   LIBPKG=libcupsimage2 ;;
+    fedora) LIBPKG=cups-libs ;;
+    arch)   LIBPKG=libcups ;;
+  esac
+  if [ -n "${LIBPKG:-}" ] && grep -q libcupsimage <<<"$LIBS"; then
+    ui_yesno "$(t "Epsons escpr2 braucht noch $LIBPKG. Installieren?" "Epson's escpr2 also needs $LIBPKG. Install it?")" \
+      || die "$(t Abgebrochen Cancelled)"
+    case $FAMILY in
+      debian) apt-get install -y "$LIBPKG" ;;
+      suse)   zypper install -y "$LIBPKG" ;;
+      fedora) dnf install -y "$LIBPKG" ;;
+      arch)   pacman -S --needed --noconfirm "$LIBPKG" ;;
+    esac
+    LIBS=$(missing_libs "$WRAPPER")
+  fi
+  [ -z "$LIBS" ] || die "$(t "Dem Epson-Wrapper fehlen Bibliotheken" "Libraries missing for the Epson wrapper"): ${LIBS//$'\n'/ } ($WRAPPER)"
 fi
 
 # --- 3. Own files ------------------------------------------------------------------------------

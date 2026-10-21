@@ -25,7 +25,16 @@ First public release.
 ### Verified
 - Manjaro (CUPS 2.4.14): installation, printing via USB and network, GIMP, Inkscape, LibreOffice,
   Okular, Affinity 3 under Wine.
+- Debian 12, Ubuntu 22.04, Ubuntu 24.04, Fedora 44 (fresh containers, CUPS only): installation including
+  Epson downloads, print jobs to a test receiver (mug PDF: same paper size and commands on all four), switching colour
+  management, reinstall keeps settings, uninstall.
 - Colour values sent to the printer are identical to those of the Windows driver; pressed mugs from
   Linux and Windows are indistinguishable.
+
+### Notes
+- Epson's escpr2 .deb does not declare its dependency on libcupsimage; the installer installs
+  `libcupsimage2` / `libcupsimage2t64` when the wrapper needs it.
+- The PPD maps IPP `print-quality` explicitly (`*APPrinterPreset`). Without this, Ubuntu's CUPS guessed a
+  mapping and printed with quality "Standard" instead of the default "High".
 
 [0.9.0]: https://github.com/OWNER/epson-scf100-linux/releases/tag/v0.9.0
