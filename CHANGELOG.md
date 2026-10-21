@@ -12,7 +12,8 @@ First public release.
   Print jobs match the Windows driver command by command (media, quality, print direction, paper size,
   colour table in the printer off).
 - Colour management with Epson's official ICC profiles (Rigid, Textile), perceptual or relative colorimetric.
-  Option "None" for applications that convert to the Epson profile themselves.
+  Option "None" for applications whose own colour management converts with the Epson profile (e.g. Affinity,
+  Photoshop), the workflow that is often the more reliable one on Windows.
 - Paper sizes: mug (240 x 100 mm, landscape), A4, Letter, Legal and custom sizes up to 216 x 1200 mm.
 - Mirroring on/off, unidirectional/bidirectional printing, quality High/Standard.
 - `install.sh`: guided setup (whiptail/dialog or plain text) in German or English depending on the locale,

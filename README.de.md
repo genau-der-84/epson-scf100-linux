@@ -108,7 +108,11 @@ Genau einer darf umrechnen, sonst stimmen die Farben nicht. Die Option heißt **
 | Einstellung | wann |
 |---|---|
 | **Treiber** (Vorgabe) | Das Programm schickt normale sRGB-Farben: GIMP, Inkscape, LibreOffice, Bildbetrachter, `lp`. Der Treiber rechnet mit dem Epson-Profil um. |
-| **Keine** | Das Programm hat schon ins Epson-Profil umgerechnet, z. B. Affinity mit dem Epson-Profil als Druckerprofil. |
+| **Keine** | Das Programm verwaltet die Farben und rechnet mit dem Epson-Profil um. Affinity und Photoshop bieten diese Wahl im Druckdialog an (Farbverwaltung durch das Programm statt durch den Drucker). |
+
+Unter Windows ist die Farbverwaltung durch das Programm mit dem Epson-Profil oft der zuverlässigere Weg zu
+richtigen Farben. Dieser Treiber bringt genau diesen Weg nach Linux: Affinity unter Wine liefert dieselben
+Farbwerte wie unter Windows.
 
 Wo man sie wählt:
 - **Für einen einzelnen Druck** im Druckdialog von GTK- und Qt-Programmen, bei den Druckeroptionen.
@@ -119,8 +123,9 @@ Wo man sie wählt:
   - im Menü von `sudo ./install.sh`,
   - in der CUPS-Weboberfläche unter `http://localhost:631`.
 - **Programme unter Wine** (Affinity, Photoshop …) zeigen die Treiberoptionen nicht und nehmen immer die
-  Vorgabe der Warteschlange. Für sie gibt es die zusätzliche Warteschlange `…-Programmfarbe` (Option `-a`).
-  Ihre Vorgabe ist „Keine“, im Programm wählt man nur diesen Drucker. Siehe
+  Vorgabe der Warteschlange. Wer dort die Farbverwaltung dem Programm überlässt, nimmt die zusätzliche
+  Warteschlange `…-Programmfarbe` (Option `-a`). Ihre Vorgabe ist „Keine“, im Programm wählt man nur diesen
+  Drucker. Siehe
   [docs/affinity-wine.de.md](docs/affinity-wine.de.md).
 
 Eine eigene Einstellung eines Benutzers (`lpoptions -p WARTESCHLANGE -o ScfColor=…`, in `~/.cups/lpoptions`)

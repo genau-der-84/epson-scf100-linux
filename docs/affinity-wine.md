@@ -6,8 +6,10 @@ Windows applications running under Wine print through CUPS like any Linux progra
 
 - Their print dialog does **not show the driver options** (media, colour management …). They always use the
   defaults of the print queue.
-- Applications like Affinity or Photoshop convert colours to the printer profile **themselves**. The driver
-  must then not convert a second time.
+- Applications like Affinity or Photoshop let you choose whether the application or the printer manages
+  colours. On Windows, colour management by the application with the Epson profile is often the more
+  reliable way to get correct colours. If you choose it, the application converts to the Epson profile and
+  the driver must not convert a second time. This guide brings that workflow to Linux.
 
 Verified with Affinity 3.3 (AppImage by ryzendew, Wine 11) on Manjaro: the colour values that arrive at the
 driver are identical to those of a LittleCMS conversion sRGB → Epson Rigid, perceptual (759,264 of 759,264

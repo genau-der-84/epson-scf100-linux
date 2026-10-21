@@ -55,7 +55,7 @@ Ohne Fenster:
   -m, --medium rigid|textile         vorgewähltes Papier (Standard: rigid)
   -q, --qualitaet stark|standard     vorgewählte Qualität (Standard: stark)
   -a, --programmfarbe                zusätzlich eine Warteschlange "...-Programmfarbe" ohne Farbumrechnung
-                                     (für Programme, die selbst ins Epson-Profil umrechnen, z. B. unter Wine)
+                                     (für Farbverwaltung im Programm mit dem Epson-Profil, z. B. Affinity unter Wine)
   -c, --farbe treiber|keine          Farbverwaltung der vorhandenen Warteschlangen umstellen, sonst nichts
   -o, --nur-treiber                  nur den Treiber, keine Warteschlange
   -d, --dmg DATEI                    Epson-macOS-Treiber (.dmg) für die ICC-Profile von hier nehmen
@@ -81,7 +81,7 @@ Without dialogs:
   -m, --media rigid|textile          default paper (default: rigid)
   -q, --quality high|standard        default quality (default: high)
   -a, --app-color                    also create a queue "...-AppColor" without colour conversion (for
-                                     applications that convert to the Epson profile themselves, e.g. under Wine)
+                                     colour management in the application with the Epson profile, e.g. Affinity under Wine)
   -c, --color driver|none            switch colour management of the existing queues, nothing else
   -o, --driver-only                  install the driver only, no print queue
   -d, --dmg FILE                     use this Epson macOS driver (.dmg) for the ICC profiles
@@ -230,7 +230,7 @@ color_of() {  # queue -> Driver | Application
     for (i = 1; i <= n; i++) if (w[i] ~ /^\*/) print substr(w[i], 2) }'
 }
 color_name() {
-  if [ "$1" = Application ]; then t "keine Umrechnung (Programm rechnet selbst um)" "no conversion (application converts)"
+  if [ "$1" = Application ]; then t "keine Umrechnung (Farbverwaltung im Programm)" "no conversion (colour management in the application)"
   else t "Treiber rechnet mit dem Epson-Profil um" "driver converts with the Epson profile"; fi
 }
 set_color() {  # queue Driver|Application
@@ -272,7 +272,7 @@ Applies to every application using this queue unless something else is chosen
 in the print dialog. Applications under Wine (e.g. Affinity) always use this
 default.")" \
     Driver "$(t "Treiber rechnet um (GIMP, Inkscape, Bildbetrachter ...)" "Driver converts (GIMP, Inkscape, image viewers ...)")" \
-    Application "$(t "Keine – Programm rechnet selbst ins Epson-Profil um" "None – the application converts to the Epson profile")") || exit 1
+    Application "$(t "Keine – die Farbverwaltung des Programms rechnet ins Epson-Profil um" "None – the application's colour management converts to the Epson profile")") || exit 1
   [ "$UI" = text ] || clear
   info "$(t "Farbverwaltung umstellen" "Switching colour management")"
   set_color "$q" "$choice"
@@ -379,16 +379,16 @@ It can be changed at any time in the print dialog of every application.")" \
       Standard "$(t "Standard (schneller)" "Standard (faster)")") || exit 1
     choice=$(ui_menu "$(t "Zusätzliche Warteschlange ohne Farbumrechnung anlegen?
 
-Für Programme, die selbst ins Epson-Profil umrechnen und deren Druckdialog
-die Optionen dieses Treibers nicht zeigt, vor allem Windows-Programme unter
-Wine (Affinity, Photoshop ...). Im Programm dann das Epson-Profil als
-Druckerprofil wählen. Alle anderen Programme nutzen die normale Warteschlange." \
+Für Programme, in denen du die Farbverwaltung dem Programm überlässt und das
+Epson-Profil als Druckerprofil wählst, vor allem Windows-Programme unter Wine
+(Affinity, Photoshop ...). Deren Druckdialog zeigt die Optionen dieses
+Treibers nicht. Alle anderen Programme nutzen die normale Warteschlange." \
 "Create an additional queue without colour conversion?
 
-For applications that convert to the Epson profile themselves and whose print
-dialog does not show this driver's options, mainly Windows applications under
-Wine (Affinity, Photoshop ...). Choose the Epson profile as printer profile in
-the application. All other applications use the regular queue.")" \
+For applications where you leave colour management to the application and
+choose the Epson profile as printer profile, mainly Windows applications under
+Wine (Affinity, Photoshop ...). Their print dialog does not show this driver's
+options. All other applications use the regular queue.")" \
       no "$(t "Nein" "No")" \
       yes "$(t "Ja, zusätzlich „…$SUFFIX“ anlegen" "Yes, also create \"…$SUFFIX\"")") || exit 1
     [ "$choice" = yes ] && APP_COLOR=1
@@ -684,9 +684,9 @@ if [ "$UI" != text ]; then
   w+="\n$(t "Drucken aus jedem Programm. Für Tassen das Format „Tasse (240 x 100 mm)“
 wählen und im Programm Hochformat lassen." "Print from any application. For mugs choose the paper size \"Mug (240 x 100 mm)\"
 and leave the application set to portrait.")"
-  [ "$APP_COLOR" = 1 ] && w+="\n\n$(t "„…$SUFFIX“ ist für Programme, die selbst ins Epson-Profil umrechnen
-(z. B. Affinity unter Wine): dort das Epson-Profil als Druckerprofil wählen." "\"…$SUFFIX\" is for applications that convert to the Epson profile themselves
-(e.g. Affinity under Wine): choose the Epson profile as printer profile there.")"
+  [ "$APP_COLOR" = 1 ] && w+="\n\n$(t "„…$SUFFIX“ ist für Farbverwaltung im Programm (z. B. Affinity unter Wine):
+dort das Epson-Profil als Druckerprofil wählen." "\"…$SUFFIX\" is for colour management in the application (e.g. Affinity under
+Wine): choose the Epson profile as printer profile there.")"
   [ ${#NETWORK[@]} -gt 0 ] && w+="\n\n$(t "Tipp: Im Router eine feste Adresse für den Drucker einrichten, sonst
 findet die Netz-Warteschlange ihn nach einem Adresswechsel nicht mehr." "Tip: give the printer a fixed address in your router, otherwise the network
 queue loses it when the address changes.")"

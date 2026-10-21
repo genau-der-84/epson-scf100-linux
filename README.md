@@ -103,7 +103,11 @@ Exactly one party may convert, otherwise the colours are wrong. The option is ca
 | Setting | When |
 |---|---|
 | **Driver** (default) | The application sends normal sRGB colours: GIMP, Inkscape, LibreOffice, image viewers, `lp`. The driver converts with the Epson profile. |
-| **None** | The application has already converted to the Epson profile, e.g. Affinity with the Epson profile selected as printer profile. |
+| **None** | The application manages the colours and converts with the Epson profile. Affinity and Photoshop let you choose this in their print dialog (colour management by the application instead of the printer). |
+
+On Windows, letting the application manage colours with the Epson profile is often the more reliable way to
+get correct colours. This driver brings exactly that workflow to Linux: Affinity under Wine sends the same
+colour values as on Windows.
 
 Where to choose it:
 - **For a single print** in the print dialog of GTK and Qt applications, among the printer options.
@@ -111,8 +115,8 @@ Where to choose it:
   configure the printer → page with the printer options → Color Management), with `sudo ./install.sh -c driver|none`, in the menu of
   `sudo ./install.sh`, or in the CUPS web interface at `http://localhost:631`.
 - **Applications under Wine** (Affinity, Photoshop …) do not show the driver options and always use the
-  queue default. Use the additional queue `…-AppColor` (option `-a`) for them: its default is "None",
-  so you only pick that printer in the application. See [docs/affinity-wine.md](docs/affinity-wine.md).
+  queue default. If you let the application manage colours there, use the additional queue `…-AppColor`
+  (option `-a`): its default is "None", so you only pick that printer in the application. See [docs/affinity-wine.md](docs/affinity-wine.md).
 
 A user's own setting (`lpoptions -p QUEUE -o ScfColor=…`, stored in `~/.cups/lpoptions`) overrides the
 queue default. Switching via `install.sh` therefore removes the calling user's own setting.

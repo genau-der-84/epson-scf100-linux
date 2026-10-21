@@ -6,8 +6,10 @@ Windows-Programme unter Wine drucken über CUPS wie jedes Linux-Programm. Zwei D
 
 - Ihr Druckdialog zeigt die **Treiberoptionen nicht** (Medium, Farbverwaltung …). Sie nehmen immer die
   Vorgaben der Warteschlange.
-- Programme wie Affinity oder Photoshop rechnen die Farben **selbst** ins Druckerprofil um. Der Treiber darf
-  dann nicht ein zweites Mal umrechnen.
+- Programme wie Affinity oder Photoshop lassen dich wählen, ob das Programm oder der Drucker die Farben
+  verwaltet. Unter Windows ist die Farbverwaltung durch das Programm mit dem Epson-Profil oft der
+  zuverlässigere Weg zu richtigen Farben. Wählst du sie, rechnet das Programm ins Epson-Profil um, und der
+  Treiber darf nicht ein zweites Mal umrechnen. Diese Anleitung bringt genau diesen Weg nach Linux.
 
 Geprüft mit Affinity 3.3 (AppImage von ryzendew, Wine 11) unter Manjaro:
 - Die Farbwerte, die beim Treiber ankommen, gleichen einer LittleCMS-Umrechnung sRGB → Epson Rigid,
