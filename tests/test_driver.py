@@ -155,11 +155,14 @@ class FilterTest(unittest.TestCase):
 
 class ConsistencyTest(unittest.TestCase):
     def test_versions_match(self):
-        version = open(os.path.join(ROOT, "VERSION")).read().strip()
-        ppd = open(os.path.join(ROOT, "ppd", "epson-scf100-sublimation.ppd"), encoding="latin-1").read()
+        def read(*path, encoding="utf-8"):
+            with open(os.path.join(ROOT, *path), encoding=encoding) as f:
+                return f.read()
+        version = read("VERSION").strip()
+        ppd = read("ppd", "epson-scf100-sublimation.ppd", encoding="latin-1")
         self.assertIn(f'*FileVersion: "{version}"', ppd)
         self.assertIn(f"epson-scf100-linux {version}\"", ppd)
-        changelog = open(os.path.join(ROOT, "CHANGELOG.md")).read()
+        changelog = read("CHANGELOG.md")
         self.assertRegex(changelog, rf"## \[?{re.escape(version)}\]?")
 
 

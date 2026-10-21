@@ -22,7 +22,7 @@ jobs:
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
       - name: PPD check
-        run: cupstestppd ppd/epson-scf100-sublimation.ppd
+        run: cupstestppd -I filters ppd/epson-scf100-sublimation.ppd   # filter is not installed in CI
       - name: Installer help and version
         run: |
           ./install.sh --version
