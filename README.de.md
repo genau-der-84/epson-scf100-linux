@@ -132,7 +132,6 @@ Wo man sie wählt:
   Warteschlange `…-Programmfarbe` (Option `-a`). Ihre Vorgabe ist „Keine“, im Programm wählt man nur diesen
   Drucker. Siehe [docs/affinity-wine.de.md](docs/affinity-wine.de.md).
 
-
 ## Aktualisieren und entfernen
 
 Aktualisieren: neue Version holen und `sudo ./install.sh` erneut starten. Vorhandene Warteschlangen behalten
