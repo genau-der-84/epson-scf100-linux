@@ -13,6 +13,7 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 - In text mode the installer says why there are no dialog windows (whiptail missing, e.g. on Fedora Workstation).
+- Clearer description in the installer's main menu: what the driver does instead of "a regular printer for dye sublimation".
 
 ## [0.1.0] - 2026-10-21
 

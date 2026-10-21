@@ -286,14 +286,16 @@ guided() {
   local choice
   choice=$(ui_menu "$(t "Was möchtest du tun?
 
-Dieser Treiber macht den Epson SC-F100 zu einem normalen Drucker für den
-Sublimationsdruck, mit Epsons offiziellem ICC-Profil. Er nutzt Epsons escpr2
-und die Profile aus Epsons macOS-Treiber. Beides wird direkt bei Epson geladen." \
+Dieser Treiber druckt Transferpapiere auf dem Epson SC-F100 aus jedem
+Linux-Programm, mit Epsons offiziellen ICC-Profilen wie unter Windows.
+Er nutzt Epsons escpr2 und die Profile aus Epsons macOS-Treiber.
+Beides wird direkt bei Epson geladen." \
 "What would you like to do?
 
-This driver turns the Epson SC-F100 into a regular printer for dye sublimation,
-using Epson's official ICC profile. It relies on Epson's escpr2 and on the
-profiles from Epson's macOS driver, both downloaded directly from Epson.")" \
+This driver prints transfer paper on the Epson SC-F100 from any Linux
+application, with Epson's official ICC profiles, just like on Windows.
+It relies on Epson's escpr2 and on the profiles from Epson's macOS driver,
+both downloaded directly from Epson.")" \
     install "$(t "Installieren oder aktualisieren" "Install or update")" \
     color "$(t "Farbverwaltung einer Warteschlange umstellen" "Switch the colour management of a queue")" \
     uninstall "$(t "Alles wieder entfernen" "Remove everything")") || exit 1
