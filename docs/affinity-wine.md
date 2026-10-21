@@ -36,7 +36,7 @@ The profiles are at `/usr/share/scf100-sublimation/profiles/rigid.icc` and `text
   cp /usr/share/scf100-sublimation/profiles/textile.icc "$C/Epson_SC-F100_Textile.icm"
   ```
 - Affinity did not offer the profile even then. **Importing it in Affinity** worked:
-  Settings → Colour → Import ICC profile. Affinity stores it in its own folder
+  in Affinity 3 **File → Import ICC Profile** (German UI: Datei → ICC-Profil importieren). Affinity stores it in its own folder
   (`AppData\Roaming\Affinity\Affinity\3.0\profiles`).
 
 ## 3. Printing from Affinity
