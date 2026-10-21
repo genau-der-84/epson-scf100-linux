@@ -1,0 +1,41 @@
+name: Bug report / Fehlerbericht
+description: Something does not work as expected / Etwas funktioniert nicht wie erwartet
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        English or German are both fine. / Englisch oder Deutsch, beides ist in Ordnung.
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution and version
+      placeholder: "e.g. Ubuntu 24.04, Manjaro 2026-10"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Driver version (`./install.sh --version`) and escpr2 version
+      placeholder: "0.9.0, escpr2 1.2.43"
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options: [USB, Network (LPR), both]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, what did you expect? Which application, which settings?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "Output of install.sh, and the lines with `rastertoscf100` from `journalctl -u cups` or `/var/log/cups/error_log`."
+      render: text

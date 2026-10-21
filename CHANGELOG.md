@@ -1,0 +1,31 @@
+# Changelog
+
+All notable changes to this project are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow [Semantic Versioning](https://semver.org/).
+
+## [0.9.0] - 2026-10-21
+
+First public release.
+
+### Added
+- CUPS driver for the Epson SureColor SC-F100 in dye sublimation mode: filter `rastertoscf100` and PPD.
+  Print jobs match the Windows driver command by command (media, quality, print direction, paper size,
+  colour table in the printer off).
+- Colour management with Epson's official ICC profiles (Rigid, Textile), perceptual or relative colorimetric.
+  Option "None" for applications that convert to the Epson profile themselves.
+- Paper sizes: mug (240 x 100 mm, landscape), A4, Letter, Legal and custom sizes up to 216 x 1200 mm.
+- Mirroring on/off, unidirectional/bidirectional printing, quality High/Standard.
+- `install.sh`: guided setup (whiptail/dialog or plain text) in German or English depending on the locale,
+  network discovery via mDNS/SNMP, USB and network (LPR) queues, optional queue without colour conversion
+  for applications under Wine (`-a`), switching colour management of existing queues (`-c`, menu).
+- Epson's escpr2 is installed from Epson's official download (fixed checksum, at least version 1.2.24).
+- `scf100-fetch-icc`: fetches the ICC profiles from Epson's official macOS driver (fixed checksums).
+- German translations of all printer options.
+
+### Verified
+- Manjaro (CUPS 2.4.14): installation, printing via USB and network, GIMP, Inkscape, LibreOffice,
+  Okular, Affinity 3 under Wine.
+- Colour values sent to the printer are identical to those of the Windows driver; pressed mugs from
+  Linux and Windows are indistinguishable.
+
+[0.9.0]: https://github.com/OWNER/epson-scf100-linux/releases/tag/v0.9.0

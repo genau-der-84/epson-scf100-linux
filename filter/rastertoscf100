@@ -1,0 +1,281 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
+"""CUPS filter for the Epson SC-F100 (dye sublimation): CUPS raster (RGB, 600 dpi) -> ESC/P-R.
+
+Per page:
+  1. Landscape pages (wider than long) are rotated 90 degrees clockwise into the feed direction,
+     like the Windows driver does with its mug size. Ghostscript delivers only the printable area
+     (HWMargins 8.4 pt); if the full page arrives anyway, 70 dots are cut off all around.
+  2. Colour management "Driver": sRGB -> Epson ICC profile of the selected media (LittleCMS).
+     "None": no conversion, the application has already converted to the Epson profile.
+  3. Mirroring: the printer outputs the raster mirrored by itself (Mac driver: InverseMirrorImage).
+     "Mirror on" therefore means: leave the raster unchanged.
+  4. Call Epson's epson-escpr-wrapper2 (package epson-inkjet-printer-escpr2), always with a custom
+     size: printable area + 280 dots, because escpr2 leaves 210 instead of 70 dots of right/bottom
+     margin on custom sizes.
+  5. Rewrite the job like the Windows driver: media, colour table in the printer off, print
+     direction, paper size (scf100.escpr).
+
+Called by CUPS: rastertoscf100 job user title copies options [file]
+Environment: PPD and PRINTER (set by CUPS), LANG (messages in German for de_*, else English);
+for tests SCF100_LIB, SCF100_WRAPPER, SCF100_PROFILE_DIR, SCF100_PREVIEW.
+"""
+import os
+import shlex
+import subprocess
+import sys
+import tempfile
+
+LIB = os.environ.get("SCF100_LIB", "/usr/lib/scf100-sublimation")
+HERE = os.path.dirname(os.path.realpath(__file__))     # resolves symlinks (CUPS filter directory)
+for p in (LIB, os.path.join(HERE, "..", "lib")):        # installed, or run from the source tree
+    if os.path.isdir(os.path.join(p, "scf100")):
+        sys.path.insert(0, p)
+        break
+
+from scf100 import escpr, raster  # noqa: E402
+
+GERMAN = os.environ.get("LANG", "").startswith("de")
+
+
+def t(de, en):
+    return de if GERMAN else en
+
+
+def _chosen_wrapper():
+    """Wrapper selected by install.sh (the first one with a sufficient version)."""
+    try:
+        with open(os.path.join(LIB, "wrapper")) as f:
+            return f.read().strip()
+    except OSError:
+        return ""
+
+
+WRAPPERS = [
+    os.environ.get("SCF100_WRAPPER", ""),
+    _chosen_wrapper(),
+    "/usr/lib/cups/filter/epson-escpr-wrapper2",
+    "/usr/libexec/cups/filter/epson-escpr-wrapper2",
+    "/opt/epson-inkjet-printer-escpr2/cups/lib/filter/epson-escpr-wrapper2",
+]
+PROFILE_DIRS = [
+    os.environ.get("SCF100_PROFILE_DIR", ""),
+    "/usr/share/scf100-sublimation/profiles",
+    "/usr/local/share/scf100-sublimation/profiles",
+]
+MARGIN = 70                         # dots at 600 dpi = 8.4 pt, like the Windows and Mac drivers
+ESCPR2_EXTRA = 280                  # 70 + 210 dots of margin that escpr2 subtracts on custom sizes
+MAX_WIDTH, MAX_LENGTH = 5102, 28350     # 612.2 x 3402 pt at 600 dpi (Mac driver)
+# Values from captures of the Windows driver (docs/how-it-works.md)
+MEDIA = {                           # PPD choice -> (ESC/P-R media ID, profile file)
+    "Rigid": (0xD2, "rigid.icc"),
+    "Textile": (0xD1, "textile.icc"),
+}
+QUALITY = {"High": 2, "Standard": 1}
+# Standard sizes: page size in pt (short, long) -> (m-setm ID, printable area at 600 dpi as on Windows).
+# Matched by size because Ghostscript makes up its own size name ("240x100mm"). Ghostscript also
+# rounds differently (e.g. A4 6876 instead of 6874 lines); the page is brought to the Windows size.
+SIZES = {
+    (595, 842): (0x00, 4820, 6874),     # A4, Windows capture
+    (612, 792): (0x01, 4960, 6460),     # Letter, ID from escpr2 (EPS_MSID_LETTER)
+    (612, 1008): (0x02, 4960, 8260),    # Legal (EPS_MSID_LEGAL)
+    (283, 680): (0x63, 2222, 5528),     # Mug 240 x 100 mm, Windows capture (custom size)
+}
+
+
+def find_size(pw, ph):
+    short, long_ = sorted((pw, ph))
+    for (s, l), value in SIZES.items():
+        if abs(short - s) <= 1.5 and abs(long_ - l) <= 1.5:
+            return value
+    return (0x63, None, None)
+
+
+def log(level, text):
+    print(f"{level}: rastertoscf100: {text}", file=sys.stderr, flush=True)
+
+
+def fail(text):
+    log("ERROR", text)
+    sys.exit(1)
+
+
+def ppd_defaults(path):
+    """*DefaultX: Y from the PPD."""
+    v = {}
+    if path and os.path.isfile(path):
+        try:
+            with open(path, encoding="utf-8", errors="replace") as f:
+                for line in f:
+                    if line.startswith("*Default"):
+                        k, _, w = line[8:].partition(":")
+                        v[k.strip()] = w.strip().strip('"')
+        except OSError as e:
+            log("WARNING", f"PPD {path} not readable ({e.strerror}), using built-in defaults")
+    return v
+
+
+def parse_options(text):
+    """CUPS option string (a=b c='d e' noX X) into a dict."""
+    o = {}
+    for tok in shlex.split(text or ""):
+        if "=" in tok:
+            k, w = tok.split("=", 1)
+            o[k] = w
+        elif tok.startswith("no"):
+            o[tok[2:]] = "False"
+        else:
+            o[tok] = "True"
+    return o
+
+
+def find_file(candidates, name=""):
+    for c in candidates:
+        if c:
+            p = os.path.join(c, name) if name else c
+            if os.path.isfile(p):
+                return p
+    return None
+
+
+def prepare_page(header, data, opt, profile):
+    from PIL import Image, ImageCms, ImageOps
+    # Pillow < 9.1 (Ubuntu 22.04) has no ImageCms.Intent, Pillow < 10.1 (Debian 12) no ImageCms.Flags
+    intents = getattr(ImageCms, "Intent", None)
+    perceptual = intents.PERCEPTUAL if intents else ImageCms.INTENT_PERCEPTUAL
+    relative = intents.RELATIVE_COLORIMETRIC if intents else ImageCms.INTENT_RELATIVE_COLORIMETRIC
+    bpc = (ImageCms.Flags.BLACKPOINTCOMPENSATION if hasattr(ImageCms, "Flags")
+           else ImageCms.FLAGS["BLACKPOINTCOMPENSATION"])
+    if header["cupsBitsPerColor"] != 8 or header["cupsBitsPerPixel"] != 24 or header["cupsColorOrder"] != 0:
+        fail(t("Rasterformat nicht unterstützt", "unsupported raster format")
+             + f" (bpc {header['cupsBitsPerColor']}, bpp {header['cupsBitsPerPixel']}, "
+               f"order {header['cupsColorOrder']})")
+    if header["cupsColorSpace"] not in (1, 19, 20):      # RGB, sRGB, AdobeRGB
+        fail(t(f"Farbraum {header['cupsColorSpace']} nicht unterstützt, erwartet RGB",
+               f"colour space {header['cupsColorSpace']} not supported, expected RGB"))
+    if header["HWResolutionX"] != 600 or header["HWResolutionY"] != 600:
+        fail(t("Auflösung", "resolution") + f" {header['HWResolutionX']}x{header['HWResolutionY']}, "
+             + t("erwartet 600 dpi", "expected 600 dpi"))
+    w, h = header["cupsWidth"], header["cupsHeight"]
+    img = Image.frombytes("RGB", (w, h), data[:w * h * 3])
+    pw = header.get("PageWidthF") or header["PageWidth"]
+    ph = header.get("PageHeightF") or header["PageHeight"]
+    full = (round(pw * 600 / 72), round(ph * 600 / 72))
+    if abs(w - full[0]) <= 2 and abs(h - full[1]) <= 2:          # full page instead of printable area
+        img = img.crop((MARGIN, MARGIN, w - MARGIN, h - MARGIN))
+    if pw > ph:                                                   # landscape -> feed direction
+        img = img.rotate(-90, expand=True)
+    elif find_size(pw, ph)[0] == 0x63 and find_size(pw, ph)[1] == 2222:
+        # Mug size arrives in portrait: the application rotated the landscape design itself, by CUPS
+        # convention counter-clockwise (PPD: LandscapeOrientation Plus90; Okular/Qt and GIMP with
+        # "landscape"). Windows rotates clockwise -> turn by another 180 degrees. Mug templates are
+        # never designed in portrait; at worst the sheet comes out upside down, the mirroring stays right.
+        img = img.rotate(180)
+        log("INFO", "mug size received in portrait - rotated by the application, compensated by 180 degrees")
+    if img.width + 2 * MARGIN > MAX_WIDTH or img.height + 2 * MARGIN > MAX_LENGTH:
+        fail(t(f"Seite {img.width + 2 * MARGIN}x{img.height + 2 * MARGIN} Punkte ist größer als der Drucker "
+               f"(höchstens {MAX_WIDTH}x{MAX_LENGTH}, 216 x 1200 mm)",
+               f"page {img.width + 2 * MARGIN}x{img.height + 2 * MARGIN} dots is larger than the printer "
+               f"(at most {MAX_WIDTH}x{MAX_LENGTH}, 216 x 1200 mm)"))
+    if profile:
+        intent = relative if opt.get("ScfIntent") == "Relative" else perceptual
+        flags = bpc if intent == relative else 0
+        img = ImageCms.profileToProfile(img, ImageCms.createProfile("sRGB"), profile,
+                                        renderingIntent=intent, outputMode="RGB", flags=flags)
+    if opt.get("ScfMirror", "True") != "True":
+        img = ImageOps.mirror(img)          # the printer mirrors by itself -> undo for "off"
+    size_id, fw, fh = find_size(pw, ph)
+    if fw and abs(img.width - fw) <= 4 and abs(img.height - fh) <= 4 and img.size != (fw, fh):
+        new = Image.new("RGB", (fw, fh), "white")       # crop/pad to the Windows size
+        new.paste(img.crop((0, 0, min(fw, img.width), min(fh, img.height))), (0, 0))
+        img = new
+    elif fw and img.size != (fw, fh):
+        size_id = 0x63                      # size does not match the name -> send as custom size
+    return img, size_id
+
+
+def main():
+    if len(sys.argv) not in (6, 7):
+        print("usage: rastertoscf100 job user title copies options [file]", file=sys.stderr)
+        sys.exit(1)
+    opt = ppd_defaults(os.environ.get("PPD"))
+    opt.update(parse_options(sys.argv[5]))
+    media = opt.get("ScfMedia", "Rigid")
+    if media not in MEDIA:
+        fail(t(f"Medium {media} wird nicht unterstützt", f"media {media} is not supported"))
+    quality = opt.get("ScfQuality", "High")
+    if quality not in QUALITY:
+        fail(t(f"Qualität {quality} wird nicht unterstützt", f"quality {quality} is not supported"))
+    media_id, profile_file = MEDIA[media]
+    profile = None
+    if opt.get("ScfColor", "Driver") == "Driver":
+        profile = find_file(PROFILE_DIRS, profile_file)
+        if not profile:
+            fail(t(f"ICC-Profil {profile_file} fehlt - sudo scf100-fetch-icc ausführen",
+                   f"ICC profile {profile_file} is missing - run sudo scf100-fetch-icc")
+                 + f" ({', '.join(p for p in PROFILE_DIRS if p)})")
+    wrapper, too_old = None, []
+    for w in WRAPPERS:
+        if w and os.path.isfile(w):
+            v = escpr.wrapper_version(w)
+            if v and v >= escpr.ESCPR2_MIN:
+                wrapper = w
+                break
+            too_old.append(f"{w} ({'.'.join(map(str, v)) if v else '?'})")
+    if not wrapper:
+        minimum = ".".join(map(str, escpr.ESCPR2_MIN))
+        if too_old:
+            fail(t(f"epson-escpr-wrapper2 zu alt: {', '.join(too_old)} - mindestens {minimum} nötig "
+                   f"(ältere Versionen drucken eigene Formate als A4). install.sh erneut ausführen.",
+                   f"epson-escpr-wrapper2 too old: {', '.join(too_old)} - at least {minimum} needed "
+                   f"(older versions print custom sizes as A4). Run install.sh again."))
+        fail(t("epson-escpr-wrapper2 nicht gefunden - install.sh ausführen",
+               "epson-escpr-wrapper2 not found - run install.sh"))
+
+    source = open(sys.argv[6], "rb") if len(sys.argv) == 7 else sys.stdin.buffer
+    with tempfile.NamedTemporaryFile(prefix="scf100-", suffix=".ras") as ras:
+        size = None
+        ras.write(b"3SaR")
+        try:
+            for nr, (header, data) in enumerate(raster.pages(source), 1):
+                img, size_id = prepare_page(header, data, opt, profile)
+                if size is None:
+                    size = img.size
+                elif size != img.size:
+                    fail(t(f"Seite {nr} hat ein anderes Format als Seite 1 - bitte getrennt drucken",
+                           f"page {nr} has a different size than page 1 - please print separately"))
+                page_pt = ((img.width + 2 * MARGIN) * 72 / 600, (img.height + 2 * MARGIN) * 72 / 600)
+                ras.write(raster.header_v3(img.width, img.height, 600, page_pt))
+                ras.write(img.tobytes())
+                if os.environ.get("SCF100_PREVIEW"):       # debugging: the page as it goes to escpr2
+                    img.reduce(10).save(f"{os.environ['SCF100_PREVIEW']}-{nr}.png")
+                log("INFO", f"page {nr}: printable {img.width}x{img.height} dots")
+        except raster.RasterError as e:
+            fail(str(e))
+        if size is None:
+            fail(t("keine Seite im Raster", "no page in the raster"))
+        ras.flush()
+
+        # Custom size for escpr2; the library rounds down, hence a small surcharge
+        mm = lambda dots: (dots + ESCPR2_EXTRA + 0.05) / 600 * 25.4  # noqa: E731
+        wopt = (f"PageSize=Custom.{mm(size[0]):.4f}x{mm(size[1]):.4f}mm Ink=COLOR "
+                f"MediaType=PLAIN_HIGH InputSlot=Auto")
+        name = os.environ.get("PRINTER", "scf100")       # the unmodified wrapper fetches the PPD from CUPS by name
+        e = subprocess.run([name, sys.argv[1], sys.argv[2], sys.argv[3], "1", wopt, ras.name],
+                           executable=wrapper, capture_output=True)
+    if e.returncode != 0 or not e.stdout:
+        fail(f"epson-escpr-wrapper2 rc={e.returncode}: {e.stderr.decode(errors='replace')[-300:]}")
+    try:
+        job = escpr.rewrite(e.stdout, media_id, 0 if opt.get("ScfDirection") == "Bi" else 1,
+                            QUALITY[quality], size_id)
+    except ValueError as err:
+        fail(str(err))
+    sys.stdout.buffer.write(job)
+    sys.stdout.buffer.flush()
+    log("INFO", f"job {len(job)} bytes, media {media}, quality {quality}, paper 0x{size_id:02x}, "
+                f"mirror {opt.get('ScfMirror', 'True')}, "
+                f"colour {'profile ' + os.path.basename(profile) if profile else 'from application'}")
+
+
+if __name__ == "__main__":
+    main()

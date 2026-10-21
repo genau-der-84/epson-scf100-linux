@@ -1,0 +1,21 @@
+name: Other printer model / Anderes Druckermodell
+description: Interest in support for another Epson sublimation printer (e.g. SC-F500) / Interesse an einem weiteren Modell
+labels: [model-request]
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Printer model
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Can you help?
+      options:
+        - label: I have the printer and a Windows PC, and can save a print job to a file ("FILE:" port) for comparison.
+        - label: I can test on Linux and press test prints.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
