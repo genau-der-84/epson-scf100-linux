@@ -37,4 +37,4 @@ First public release.
 - The PPD maps IPP `print-quality` explicitly (`*APPrinterPreset`). Without this, Ubuntu's CUPS guessed a
   mapping and printed with quality "Standard" instead of the default "High".
 
-[0.9.0]: https://github.com/OWNER/epson-scf100-linux/releases/tag/v0.9.0
+[0.9.0]: https://github.com/genau-der-84/epson-scf100-linux/releases/tag/v0.9.0

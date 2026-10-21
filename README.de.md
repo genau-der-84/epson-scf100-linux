@@ -43,7 +43,7 @@ verglichen). Gepresste Tassen von Linux- und Windows-Drucken sehen gleich aus.
 ## Installation
 
 ```sh
-git clone https://github.com/OWNER/epson-scf100-linux.git
+git clone https://github.com/genau-der-84/epson-scf100-linux.git
 cd epson-scf100-linux
 sudo ./install.sh
 ```
