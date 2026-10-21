@@ -200,8 +200,9 @@ search_printers() {
       | sort -u) || true
   fi
   if [ -z "$found" ] && command -v lpinfo >/dev/null; then
-    # The model name is only in the long listing (-l); the short one prints just class and URI
-    found=$(timeout 30 lpinfo -l --include-schemes snmp -v 2>/dev/null \
+    # The model name is only in the long listing (-l); the short one prints just class and URI.
+    # LC_ALL=C: CUPS translates the labels (German: "Hersteller-und-Modell" instead of "make-and-model").
+    found=$(LC_ALL=C timeout 30 lpinfo -l --include-schemes snmp -v 2>/dev/null \
       | awk '/^Device: uri = / { uri = $4 }
              /^[ \t]+make-and-model = .*SC-F100/ && match(uri, /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/) {
                print substr(uri, RSTART, RLENGTH) "\tEPSON SC-F100 (SNMP)" }' \
@@ -214,7 +215,7 @@ start_cups() {
   systemctl is-active -q cups 2>/dev/null || systemctl start cups 2>/dev/null || systemctl start cups.socket 2>/dev/null || true
 }
 find_usb() {  # ask only the USB backend: fast, and does not hang on network backends
-  lpinfo --include-schemes usb -v 2>/dev/null | awk '$2 ~ /^usb:\/\/EPSON\/SC-F100/ {print $2; exit}' || true; }
+  LC_ALL=C lpinfo --include-schemes usb -v 2>/dev/null | awk '$2 ~ /^usb:\/\/EPSON\/SC-F100/ {print $2; exit}' || true; }
 queue_exists() { lpstat -v "$1" >/dev/null 2>&1; }
 existing_name() {  # preferred name, other-language name -> the one that exists, else the preferred one
   if ! queue_exists "$1" && queue_exists "$2"; then echo "$2"; else echo "$1"; fi
@@ -226,7 +227,7 @@ existing_name() {  # preferred name, other-language name -> the one that exists,
 # would have no effect for them.
 own_queues() {  # all queues of this driver, one name per line
   local q
-  for q in $(lpstat -v 2>/dev/null | awk '{print $3}' | tr -d ':'); do
+  for q in $(LC_ALL=C lpstat -v 2>/dev/null | awk '{print $3}' | tr -d ':'); do
     timeout 10 lpoptions -p "$q" 2>/dev/null | grep -q 'scf100' && echo "$q"   # timeout: foreign network printers can hang
   done
   return 0
