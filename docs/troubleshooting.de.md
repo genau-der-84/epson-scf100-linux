@@ -9,6 +9,7 @@
 | Motiv aus GIMP zu klein oder auf dem Kopf | In der Seiteneinrichtung **Hochformat** lassen, Bildauflösung auf 300 ppi stellen. |
 | Farben zu dunkel oder verschoben | Prüfen, dass genau einer umrechnet (siehe [Farbverwaltung](../README.de.md#farbverwaltung-wer-rechnet-ins-epson-profil-um)). Affinity: Druckerprofil = Epson-Profil **und** Warteschlange `…-Programmfarbe`. |
 | Bild per `lp` in falscher Größe | CUPS skaliert Bilder. Für ein Bild in Tassengröße `lp -d WARTESCHLANGE -o print-scaling=none motiv.png` nehmen. |
+| Farbverwaltung umgestellt, wirkt aber nicht | Eine eigene Einstellung des Benutzers (`lpoptions -p WARTESCHLANGE -o ScfColor=…`, gespeichert in `~/.cups/lpoptions`) geht der Vorgabe der Warteschlange vor. Mit `lpoptions -p WARTESCHLANGE -r ScfColor` entfernen. Beim Umstellen über `sudo ./install.sh` geschieht das für den aufrufenden Benutzer automatisch. |
 | Warteschlange findet den Drucker nicht mehr | Der Drucker hat eine neue IP-Adresse. Im Router eine feste reservieren und `sudo ./install.sh -n NEUE_ADRESSE` starten. |
 | `lpadmin` meldet, Druckertreiber seien veraltet | CUPS warnt bei jedem PPD-Treiber. Mit CUPS 2.x wird weiter gedruckt, der Installer blendet die Meldung aus. |
 

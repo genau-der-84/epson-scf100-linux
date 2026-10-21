@@ -9,6 +9,7 @@
 | Design too small or upside down from GIMP | In the page setup leave **portrait**; set the image resolution to 300 ppi. |
 | Colours too dark or shifted | Check that exactly one party converts colours (see [Colour management](../README.md#colour-management-who-converts-to-the-epson-profile)). Affinity: printer profile = Epson profile **and** queue `…-AppColor`. |
 | Image printed with `lp` has the wrong size | CUPS scales images. For an image at mug size use `lp -d QUEUE -o print-scaling=none design.png`. |
+| Colour management switched, but no effect | A user's own setting (`lpoptions -p QUEUE -o ScfColor=…`, stored in `~/.cups/lpoptions`) overrides the queue default. Remove it with `lpoptions -p QUEUE -r ScfColor`. Switching via `sudo ./install.sh` does this automatically for the calling user. |
 | Queue does not find the printer any more | The printer got a new IP address. Reserve a fixed one in the router and run `sudo ./install.sh -n NEW_ADDRESS`. |
 | `lpadmin` says printer drivers are deprecated | CUPS warns about every PPD-based driver. Printing keeps working with CUPS 2.x; the installer hides the message. |
 

@@ -42,6 +42,8 @@ verglichen). Gepresste Tassen von Linux- und Windows-Drucken sehen gleich aus.
   der Installer an, fehlende Pakete nachzuinstallieren.
 - Internetzugang während der Installation (Downloads bei Epson, rund 75 MB).
 
+**Getestet unter** Manjaro, Debian 12, Ubuntu 22.04, Ubuntu 24.04 und Fedora 44.
+
 ## Installation
 
 ```sh
@@ -128,12 +130,8 @@ Wo man sie wählt:
 - **Programme unter Wine** (Affinity, Photoshop …) zeigen die Treiberoptionen nicht und nehmen immer die
   Vorgabe der Warteschlange. Wer dort die Farbverwaltung dem Programm überlässt, nimmt die zusätzliche
   Warteschlange `…-Programmfarbe` (Option `-a`). Ihre Vorgabe ist „Keine“, im Programm wählt man nur diesen
-  Drucker. Siehe
-  [docs/affinity-wine.de.md](docs/affinity-wine.de.md).
+  Drucker. Siehe [docs/affinity-wine.de.md](docs/affinity-wine.de.md).
 
-Eine eigene Einstellung eines Benutzers (`lpoptions -p WARTESCHLANGE -o ScfColor=…`, in `~/.cups/lpoptions`)
-geht der Vorgabe der Warteschlange vor. Beim Umstellen über `install.sh` wird die des aufrufenden Benutzers
-deshalb entfernt.
 
 ## Aktualisieren und entfernen
 
@@ -148,15 +146,7 @@ Farben, wo die Protokolle liegen.
 
 ## Wie es funktioniert
 
-CUPS rechnet die Seite mit Ghostscript in ein RGB-Raster um. `rastertoscf100` dreht und spiegelt es,
-rechnet die Farben mit dem Epson-Profil um (LittleCMS) und lässt es von Epsons `epson-escpr-wrapper2`
-kodieren. Danach schreibt er den Auftrag so um, wie der Windows-Treiber ihn sendet:
-- Medienkennung für Sublimation,
-- Qualität,
-- Farbtabelle im Drucker aus,
-- fester Papierweg,
-- Druckrichtung.
-
+Der Treiber schickt dieselben Druckaufträge wie Epsons Windows-Treiber, nur unter Linux.
 Einzelheiten (englisch): [docs/how-it-works.md](docs/how-it-works.md).
 
 ## Lizenz und Fremdbestandteile

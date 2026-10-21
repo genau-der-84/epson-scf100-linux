@@ -41,6 +41,8 @@ byte by byte), and mugs pressed from Linux and from Windows prints look the same
   Arch/Manjaro, Debian/Ubuntu, Fedora and openSUSE.
 - Internet access during installation (Epson downloads, about 75 MB).
 
+**Tested on** Manjaro, Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Fedora 44.
+
 ## Installation
 
 ```sh
@@ -119,10 +121,8 @@ Where to choose it:
   `sudo ./install.sh`, or in the CUPS web interface at `http://localhost:631`.
 - **Applications under Wine** (Affinity, Photoshop …) do not show the driver options and always use the
   queue default. If you let the application manage colours there, use the additional queue `…-AppColor`
-  (option `-a`): its default is "None", so you only pick that printer in the application. See [docs/affinity-wine.md](docs/affinity-wine.md).
-
-A user's own setting (`lpoptions -p QUEUE -o ScfColor=…`, stored in `~/.cups/lpoptions`) overrides the
-queue default. Switching via `install.sh` therefore removes the calling user's own setting.
+  (option `-a`): its default is "None", so you only pick that printer in the application.
+  See [docs/affinity-wine.md](docs/affinity-wine.md).
 
 ## Updating and uninstalling
 
@@ -137,10 +137,8 @@ where to find the logs.
 
 ## How it works
 
-CUPS renders the page with Ghostscript to an RGB raster. `rastertoscf100` rotates and mirrors it, converts
-the colours with the Epson profile (LittleCMS), and lets Epson's `epson-escpr-wrapper2` encode it. It then
-rewrites the job the way the Windows driver sends it: sublimation media ID, quality, colour table in the
-printer off, fixed paper path, print direction. Details: [docs/how-it-works.md](docs/how-it-works.md).
+The driver sends the same print jobs as Epson's Windows driver, just from Linux.
+Details: [docs/how-it-works.md](docs/how-it-works.md).
 
 ## Licence and third-party components
 
