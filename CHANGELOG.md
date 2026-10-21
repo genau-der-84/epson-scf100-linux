@@ -5,6 +5,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-21
+
 ### Fixed
 - Network printer search without avahi-daemon (e.g. Manjaro, where it is disabled by default): the SNMP fallback
   looked for the model name in the short `lpinfo -v` listing, which only has class and URI, and never found the printer.
@@ -53,4 +55,6 @@ First public release.
 - The PPD maps IPP `print-quality` explicitly (`*APPrinterPreset`). Without this, Ubuntu's CUPS guessed a
   mapping and printed with quality "Standard" instead of the default "High".
 
+[Unreleased]: https://github.com/genau-der-84/epson-scf100-linux/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/genau-der-84/epson-scf100-linux/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/genau-der-84/epson-scf100-linux/releases/tag/v0.1.0

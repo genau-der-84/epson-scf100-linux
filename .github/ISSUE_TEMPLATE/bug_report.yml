@@ -17,7 +17,7 @@ body:
     id: version
     attributes:
       label: Driver version (`./install.sh --version`) and escpr2 version
-      placeholder: "0.1.0, escpr2 1.2.43"
+      placeholder: "0.1.1, escpr2 1.2.43"
     validations:
       required: true
   - type: dropdown
