@@ -3,7 +3,7 @@
 *% Filter: rastertoscf100 (epson-scf100-linux). Not made by or affiliated with Epson.
 *% SPDX-License-Identifier: GPL-2.0-or-later
 *FormatVersion: "4.3"
-*FileVersion: "0.9.0"
+*FileVersion: "0.1.0"
 *LanguageVersion: English
 *LanguageEncoding: ISOLatin1
 *PCFileName: "SCF100SB.PPD"
@@ -11,7 +11,7 @@
 *Product: "(SC-F100 Series)"
 *ModelName: "EPSON SC-F100 Series Sublimation"
 *ShortNickName: "EPSON SC-F100 Sublimation"
-*NickName: "EPSON SC-F100 Series Sublimation, epson-scf100-linux 0.9.0"
+*NickName: "EPSON SC-F100 Series Sublimation, epson-scf100-linux 0.1.0"
 *1284DeviceID: "MFG:EPSON;CMD:ESCPL2,BDC,D4,D4PX,ESCPR7,END4,GENEP;MDL:SC-F100 Series;CLS:PRINTER;DES:EPSON SC-F100 Series;"
 *PSVersion: "(3010.000) 0"
 *LanguageLevel: "3"

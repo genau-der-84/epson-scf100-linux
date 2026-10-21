@@ -3,7 +3,7 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow [Semantic Versioning](https://semver.org/).
 
-## [0.9.0] - 2026-10-21
+## [0.1.0] - 2026-10-21
 
 First public release.
 
@@ -38,4 +38,4 @@ First public release.
 - The PPD maps IPP `print-quality` explicitly (`*APPrinterPreset`). Without this, Ubuntu's CUPS guessed a
   mapping and printed with quality "Standard" instead of the default "High".
 
-[0.9.0]: https://github.com/genau-der-84/epson-scf100-linux/releases/tag/v0.9.0
+[0.1.0]: https://github.com/genau-der-84/epson-scf100-linux/releases/tag/v0.1.0
