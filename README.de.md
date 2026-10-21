@@ -1,7 +1,7 @@
 # epson-scf100-linux
 
 **Linux-Druckertreiber für den Sublimationsdrucker Epson SureColor SC-F100.**
-Tassen, Textilien und Hartwaren aus jedem Linux-Programm bedrucken, mit Epsons offiziellen ICC-Profilen,
+Transferpapiere für Tassen, Textilien und Hartwaren aus jedem Linux-Programm drucken, mit Epsons offiziellen ICC-Profilen,
 genau wie mit dem Windows-Treiber.
 
 [English](README.md) · [Änderungen](CHANGELOG.md) · [Technik (englisch)](docs/how-it-works.md) ·
@@ -13,7 +13,7 @@ genau wie mit dem Windows-Treiber.
 ## Wozu
 
 Epson bietet für den Sublimationsdrucker SureColor SC-F100 keinen Linux-Treiber an. Mit Hilfe dieses
-Projekts können Tassen, Hartwaren und Textilien unter Linux genauso bedruckt werden wie unter Windows.
+Projekts können die Transferpapiere für Tassen, Hartwaren und Textilien unter Linux genauso bedruckt werden wie unter Windows.
 Der allgemeine Treiber `escpr2` spricht zwar mit dem Drucker, nimmt aber die falschen Medieneinstellungen
 und die druckereigene Farbtabelle, die Farben stimmen damit nicht. Dieser Treiber sendet dieselben Aufträge
 wie der Windows-Treiber, rechnet die Farben mit Epsons offiziellen Sublimationsprofilen um und spiegelt

@@ -1,7 +1,7 @@
 # epson-scf100-linux
 
 **Linux printer driver for the Epson SureColor SC-F100 dye sublimation printer.**
-Print mugs, textiles and hard goods from any Linux application, with Epson's official ICC profiles,
+Print transfer paper for mugs, textiles and hard goods from any Linux application, with Epson's official ICC profiles,
 exactly like the Windows driver.
 
 [Deutsch](README.de.md) · [Changelog](CHANGELOG.md) · [How it works](docs/how-it-works.md) ·
@@ -12,7 +12,7 @@ exactly like the Windows driver.
 
 ## Why
 
-Epson offers no Linux driver for its SureColor SC-F100 sublimation printer. With this project you print mugs,
+Epson offers no Linux driver for its SureColor SC-F100 sublimation printer. With this project you print the transfer paper for mugs,
 hard goods and textiles from Linux just like from Windows. The generic `escpr2` driver can talk to the
 printer, but it uses the wrong media settings and applies the printer's own colour table, so the colours
 come out wrong. This driver sends the same print jobs as the Windows driver, converts colours with Epson's
