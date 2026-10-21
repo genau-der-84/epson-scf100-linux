@@ -1,0 +1,2 @@
+# German typographic quotes („…“) inside double-quoted UI strings are intended text, not mistyped shell quotes.
+disable=SC1111
