@@ -5,17 +5,18 @@ Print mugs, textiles and hard goods from any Linux application, with Epson's off
 exactly like the Windows driver.
 
 [Deutsch](README.de.md) · [Changelog](CHANGELOG.md) · [How it works](docs/how-it-works.md) ·
-[Affinity and other Windows applications under Wine](docs/affinity-wine.md)
+[Troubleshooting](docs/troubleshooting.md) · [Affinity and other Windows applications under Wine](docs/affinity-wine.md)
 
 > Not made by, endorsed by or affiliated with Seiko Epson Corporation. "Epson" and "SureColor" are
 > trademarks of Seiko Epson Corporation and are used here only to name the supported printer.
 
 ## Why
 
-The SC-F100 is a dedicated dye sublimation printer, and Epson offers no Linux driver for it. The generic `escpr2` driver can talk
-to the printer, but it uses the wrong media settings and applies the printer's own colour table, so
-sublimation prints come out with wrong colours. This driver sends the same print jobs as the Windows
-driver, converts colours with Epson's official sublimation ICC profiles, and mirrors the image.
+Epson offers no Linux driver for its SureColor SC-F100 sublimation printer. With this project you print mugs,
+hard goods and textiles from Linux just like from Windows. The generic `escpr2` driver can talk to the
+printer, but it uses the wrong media settings and applies the printer's own colour table, so the colours
+come out wrong. This driver sends the same print jobs as the Windows driver, converts colours with Epson's
+official sublimation ICC profiles, and mirrors the image.
 
 **Result:** The colour values sent to the printer are identical to those of the Windows driver (compared
 byte by byte), and mugs pressed from Linux and from Windows prints look the same.
@@ -124,20 +125,8 @@ Uninstall: `sudo ./install.sh -u`. An escpr2 installed through the package manag
 
 ## Troubleshooting
 
-| Symptom | Cause and fix |
-|---|---|
-| Printing over the network stalls, takes 10 minutes or more | The printer's network interface can get into a state where it answers slowly and with duplicate packets (`ping` shows high times and `DUP!`). Switch the printer off and on. A normal mug job then takes about 2.5 minutes, as on Windows. |
-| Print comes out as A4 / wrong size | `epson-inkjet-printer-escpr2` older than 1.2.24 (e.g. 1.2.9). Run `sudo ./install.sh` again; it installs 1.2.43 next to it. |
-| Design too small or upside down from GIMP | In the page setup leave **portrait**; set the image resolution to 300 ppi. |
-| Colours too dark or shifted | Check that exactly one party converts colours (see above). Affinity: printer profile = Epson profile **and** queue `…-AppColor`. |
-| Queue does not find the printer any more | The printer got a new IP address. Reserve a fixed one in the router and run `sudo ./install.sh -n NEW_ADDRESS`. |
-| `lpadmin` says printer drivers are deprecated | CUPS warns about every PPD-based driver. Printing keeps working with CUPS 2.x; the installer hides the message. |
-
-Logs: `journalctl -u cups` or `/var/log/cups/error_log` (lines with `rastertoscf100`). The status message
-of the queue (`lpstat -p`) shows the filter's error in your language. Please attach these lines when you
-open an issue.
-
-Do not use `socket://` (port 9100) for the network queue; LPR is what has been verified.
+See [docs/troubleshooting.md](docs/troubleshooting.md): slow network printing, wrong page size, colours,
+where to find the logs.
 
 ## How it works
 
