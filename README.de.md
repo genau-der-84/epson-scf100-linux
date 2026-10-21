@@ -76,7 +76,7 @@ Ohne `whiptail`/`dialog` stellt er dieselben Fragen als Text.
 | `-o`, `--nur-treiber` | nur den Treiber, keine Warteschlange |
 | `-d`, `--dmg DATEI` | ICC-Profile aus einem schon heruntergeladenen Epson-macOS-Treiber nehmen |
 | `-u`, `--entfernen` | alles entfernen |
-| `-y`, `-j`, `--ja` | keine Rückfragen |
+| `-y`, `-j`, `--ja` | keine Rückfragen; auch die Paketverwaltung bestätigt dann selbst |
 | `-t`, `--text` / `-g`, `--dialog` | Fragen als Text / in Fenstern |
 | `-l`, `--sprache de\|en` | Sprache (Standard: nach Locale) |
 | `-V`, `--version`, `-h`, `--hilfe` | Version, Hilfe |

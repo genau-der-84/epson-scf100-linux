@@ -60,7 +60,7 @@ Ohne Fenster:
   -o, --nur-treiber                  nur den Treiber, keine Warteschlange
   -d, --dmg DATEI                    Epson-macOS-Treiber (.dmg) für die ICC-Profile von hier nehmen
   -u, --entfernen                    alles wieder entfernen
-  -y, -j, --ja                       keine Rückfragen
+  -y, -j, --ja                       keine Rückfragen (auch die Paketverwaltung bestätigt dann selbst)
   -g, --dialog                       Auswahlfenster auch zusammen mit Optionen
   -t, --text                         Fragen als Text statt in Fenstern
   -l, --sprache de|en                Sprache festlegen (sonst nach Locale)
@@ -86,7 +86,7 @@ Without dialogs:
   -o, --driver-only                  install the driver only, no print queue
   -d, --dmg FILE                     use this Epson macOS driver (.dmg) for the ICC profiles
   -u, --uninstall                    remove everything again
-  -y, --yes                          do not ask questions
+  -y, --yes                          do not ask questions (the package manager confirms by itself, too)
   -g, --dialog                       dialog windows even when options are given
   -t, --text                         plain text questions instead of dialog windows
   -l, --lang de|en                   set the language (default: from the locale)
@@ -126,6 +126,7 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+USER_YES=$YES   # -y given by the user (the guided setup sets YES=1 later, after its summary)
 case "${MEDIA,,}" in rigid) MEDIA=Rigid ;; textile|textil) MEDIA=Textile ;;
   *) echo "--media: rigid|textile" >&2; exit 2 ;; esac
 case "${QUALITY,,}" in high|stark|hoch) QUALITY=High ;; standard|normal) QUALITY=Standard ;;
@@ -147,7 +148,9 @@ die()   { printf '\033[31m%s: %s\033[0m\n' "$(t FEHLER ERROR)" "$*" >&2; exit 1;
 TITLE=$(t "Epson SC-F100 Sublimation – Einrichtung" "Epson SC-F100 Sublimation – Setup")
 UI=text
 if [ "$DIALOG" = auto ]; then
-  if command -v whiptail >/dev/null; then UI=whiptail; elif command -v dialog >/dev/null; then UI=dialog; fi
+  if command -v whiptail >/dev/null; then UI=whiptail; elif command -v dialog >/dev/null; then UI=dialog
+  else echo "$(t "Hinweis: Für Auswahlfenster fehlt whiptail (Paket newt, whiptail bzw. libnewt). Die Fragen kommen als Text." \
+                 "Note: whiptail is missing for dialog windows (package newt, whiptail or libnewt). Questions come as text.")"; fi
 fi
 window() {  # call whiptail/dialog; the selection goes to stdout
   "$UI" --title "$TITLE" "$@" 3>&1 1>&2 2>&3
@@ -454,6 +457,21 @@ case " ${ID:-} ${ID_LIKE:-} " in
 esac
 FILTER_DIR=$( (cups-config --serverbin 2>/dev/null || echo /usr/lib/cups) | head -1)/filter
 
+# The package manager confirms by itself only if the user gave -y. Otherwise it shows its own summary and
+# asks: a transaction can do more than install the requested package (Fedora's dnf removed old kernels
+# because of installonly_limit while installing bsdtar, test 21.10.2026); the user must see that.
+pkg_install() {  # packages or local package files...
+  local y=()
+  case $FAMILY in
+    arch)   [ "$USER_YES" = 1 ] && y=(--noconfirm); pacman -S --needed "${y[@]}" "$@" ;;
+    debian) [ "$USER_YES" = 1 ] && y=(-y); apt-get install "${y[@]}" "$@" ;;
+    fedora) [ "$USER_YES" = 1 ] && y=(-y); dnf install "${y[@]}" "$@" ;;
+    suse)   [ "$USER_YES" = 1 ] && y=(-y)
+            local g=(); case " $* " in *".rpm "*) g=(--no-gpg-checks) ;; esac   # global option, only for Epson's unsigned rpm (checksum verified)
+            zypper "${g[@]}" install "${y[@]}" "$@" ;;
+  esac || die "$(t "Paketinstallation abgebrochen oder fehlgeschlagen" "Package installation cancelled or failed"): $*"
+}
+
 uninstall() {
   info "$(t "Warteschlangen entfernen" "Removing print queues")"
   local q
@@ -482,18 +500,18 @@ command -v bsdtar >/dev/null || MISSING+=(bsdtar)
 command -v curl >/dev/null || MISSING+=(curl)
 if [ ${#MISSING[@]} -gt 0 ]; then
   case $FAMILY in
-    arch)   declare -A P=([cups]=cups [pillow]=python-pillow [7zip]=7zip [bsdtar]=libarchive [curl]=curl); PM="pacman -S --needed --noconfirm" ;;
-    debian) declare -A P=([cups]=cups [pillow]=python3-pil [7zip]=7zip [bsdtar]=libarchive-tools [curl]=curl); PM="apt-get install -y"
+    arch)   declare -A P=([cups]=cups [pillow]=python-pillow [7zip]=7zip [bsdtar]=libarchive [curl]=curl) ;;
+    debian) declare -A P=([cups]=cups [pillow]=python3-pil [7zip]=7zip [bsdtar]=libarchive-tools [curl]=curl)
             apt-get update -qq
             apt-cache show 7zip >/dev/null 2>&1 || P[7zip]=p7zip-full ;;     # Ubuntu 22.04: only p7zip
-    fedora) declare -A P=([cups]=cups [pillow]=python3-pillow [7zip]=7zip [bsdtar]=bsdtar [curl]=curl); PM="dnf install -y" ;;
-    suse)   declare -A P=([cups]=cups [pillow]=python3-Pillow [7zip]=7zip [bsdtar]=bsdtar [curl]=curl); PM="zypper install -y" ;;
+    fedora) declare -A P=([cups]=cups [pillow]=python3-pillow [7zip]=7zip [bsdtar]=bsdtar [curl]=curl) ;;
+    suse)   declare -A P=([cups]=cups [pillow]=python3-Pillow [7zip]=7zip [bsdtar]=bsdtar [curl]=curl) ;;
     *) die "$(t "Es fehlen: ${MISSING[*]} - bitte mit der Paketverwaltung nachinstallieren" \
                 "Missing: ${MISSING[*]} - please install them with your package manager")" ;;
   esac
   PACKAGES=(); for f in "${MISSING[@]}"; do PACKAGES+=("${P[$f]}"); done
   ui_yesno "$(t "Fehlende Pakete installieren" "Install missing packages"): ${PACKAGES[*]}?" || die "$(t Abgebrochen Cancelled)"
-  $PM "${PACKAGES[@]}"
+  pkg_install "${PACKAGES[@]}"
 fi
 
 # --- 2. Epson escpr2 ---------------------------------------------------------------------------
@@ -538,9 +556,8 @@ else
       || die "$(t "Prüfsumme von $2 stimmt nicht - hat Epson das Paket geändert?" "Checksum of $2 does not match - did Epson change the package?")"
   }
   case $FAMILY in
-    debian) download "$ESCPR2_DEB_URL" escpr2.deb $ESCPR2_DEB_SHA; apt-get install -y "$TMP/escpr2.deb" ;;
-    fedora) download "$ESCPR2_RPM_URL" escpr2.rpm $ESCPR2_RPM_SHA; dnf install -y "$TMP/escpr2.rpm" ;;
-    suse)   download "$ESCPR2_RPM_URL" escpr2.rpm $ESCPR2_RPM_SHA; zypper --no-gpg-checks install -y "$TMP/escpr2.rpm" ;;
+    debian) download "$ESCPR2_DEB_URL" escpr2.deb $ESCPR2_DEB_SHA; pkg_install "$TMP/escpr2.deb" ;;
+    fedora|suse) download "$ESCPR2_RPM_URL" escpr2.rpm $ESCPR2_RPM_SHA; pkg_install "$TMP/escpr2.rpm" ;;
     *)      download "$ESCPR2_RPM_URL" escpr2.rpm $ESCPR2_RPM_SHA
             bsdtar -xf "$TMP/escpr2.rpm" -C / ./opt/epson-inkjet-printer-escpr2
             mkdir -p "$STATE"; echo "$ESCPR2_VER" > "$STATE/escpr2-unpacked" ;;
@@ -566,12 +583,7 @@ if [ -n "$LIBS" ]; then
   if [ -n "${LIBPKG:-}" ] && grep -q libcupsimage <<<"$LIBS"; then
     ui_yesno "$(t "Epsons escpr2 braucht noch $LIBPKG. Installieren?" "Epson's escpr2 also needs $LIBPKG. Install it?")" \
       || die "$(t Abgebrochen Cancelled)"
-    case $FAMILY in
-      debian) apt-get install -y "$LIBPKG" ;;
-      suse)   zypper install -y "$LIBPKG" ;;
-      fedora) dnf install -y "$LIBPKG" ;;
-      arch)   pacman -S --needed --noconfirm "$LIBPKG" ;;
-    esac
+    pkg_install "$LIBPKG"
     LIBS=$(missing_libs "$WRAPPER")
   fi
   [ -z "$LIBS" ] || die "$(t "Dem Epson-Wrapper fehlen Bibliotheken" "Libraries missing for the Epson wrapper"): ${LIBS//$'\n'/ } ($WRAPPER)"

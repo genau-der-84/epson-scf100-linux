@@ -72,7 +72,7 @@ same questions as plain text.
 | `-o`, `--driver-only` | driver only, no print queue |
 | `-d`, `--dmg FILE` | take the ICC profiles from an already downloaded Epson macOS driver |
 | `-u`, `--uninstall` | remove everything |
-| `-y`, `--yes` | no questions |
+| `-y`, `--yes` | no questions; the package manager also confirms by itself |
 | `-t`, `--text` / `-g`, `--dialog` | plain text questions / dialog windows |
 | `-l`, `--lang de\|en` | language (default: from the locale) |
 | `-V`, `--version`, `-h`, `--help` | version, help |

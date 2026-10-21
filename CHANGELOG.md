@@ -3,6 +3,17 @@
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- The installer no longer confirms package manager transactions by itself unless it was started with `-y`.
+  A transaction can do more than install the requested package (on Fedora, dnf removed old kernels because of
+  `installonly_limit` while installing bsdtar); the user now sees the package manager's summary and decides.
+- openSUSE: `--no-gpg-checks` only for Epson's unsigned escpr2 rpm (checksum verified), not for repository packages.
+
+### Changed
+- In text mode the installer says why there are no dialog windows (whiptail missing, e.g. on Fedora Workstation).
+
 ## [0.1.0] - 2026-10-21
 
 First public release.
